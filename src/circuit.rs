@@ -1,5 +1,5 @@
 use std::io::Write;
-use num_biginit::BigInt;
+use num_bigint::BigInt;
 use crate::hash_functions::HashFunction;
 use crate::rlcs::{Operation, R1CS, Variable};
 
@@ -20,7 +20,7 @@ impl Circuit {
     
 }
 
-///Apply hash function,  defaulting to a simple operationn if none is provided
+///Apply hash function,  defaulting to a simple operation if none is provided
 pub fn apply_hash(&self, a: &BigInt) -> BigInt {
     
 }
