@@ -1,4 +1,4 @@
-# 🦀 Nano-ZK: A Bare-Bones ZK Proof System in Rust
+# 🦀 Mini-ZK: A Bare-Bones ZK Proof System in Rust
 
 **Nano-ZK** is an educational-grade Zero-Knowledge (ZK) framework built from scratch in Rust. Unlike production-grade libraries (Noir, Circom) that treat the Prover/Verifier relationship as a "black box," Nano-ZK exposes the underlying plumbing of **R1CS (Rank-1 Constraint Systems)** and **Circuit Arithmetization**.
 
