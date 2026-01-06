@@ -8,6 +8,8 @@
 
 ## 🏗 Architecture Overview
 
+![Mini ZKP Architecture](Mini_ZKP.png)
+
 The system is split into three distinct layers, mimicking the workflow of modern ZK-SNARKs:
 
 ### 1. The Circuit (High-Level Logic)
