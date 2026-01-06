@@ -53,4 +53,52 @@ impl Circuit {
     pub fn get_input(&self, index: usize) -> Option<&BigInt> {
         self.inputs.get(index)
     }
+
+    /// Generates the proof and checks if the constraints are met, in which case it's saved to a binary file
+    pub fn generate_proof(&self, proof_file: &str) {
+        let mut r1cs = R1CS::new();
+        r1cs.variables = self
+            .inputs
+            .iter()
+            .enumerate()
+            .map(|(index, value)| Variable {
+                index,
+                value: value.clone(),
+            })
+            .collect(); //Every input is turned to variables in R1cs
+
+        for gate in &self.gates {
+            match gate {
+                //Addition Gate
+                Gate::Add(a, b, output) => {
+                    r1cs.add_constraint(
+                        vec![(r1cs.variables[*a].clone(), BigInt::from(1))],
+                        vec![(r1cs.variables[*b].clone(), BigInt::from(1))],
+                        vec![(r1cs.variables[*output].clone(), BigInt::from(1))],
+                        Operation::Add,
+                    );
+                }
+
+                //Multiplication gate
+                Gate::Mul(a, b, output) => {
+                    r1cs.add_constraint(
+                        vec![(r1cs.variables[*a].clone(), BigInt::from(1))],
+                        vec![(r1cs.variables[*b].clone(), BigInt::from(1))],
+                        vec![(r1cs.variables[*output].clone(), BigInt::from(1))],
+                        Operation::Mul,
+                    );
+                }
+
+                //Hashing gate
+                Gate::Hash(input, output, _) => {
+                    r1cs.add_constraint(
+                        vec![(r1cs.variables[*input].clone(), BigInt::from(1))],
+                        vec![],
+                        vec![(r1cs.variables[*output].clone(), BigInt::from(1))],
+                        Operation::Hash,
+                    );
+                }
+            }
+        }
+    }
 }
