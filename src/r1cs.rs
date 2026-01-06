@@ -1,9 +1,7 @@
 use num_bigint::BigInt;
 use serde::{Deserialize, Serialize};
-use std::fs::File;
-use std::io::Write;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Variable {
     pub index: usize,
     pub value: BigInt,
