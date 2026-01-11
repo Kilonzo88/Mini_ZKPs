@@ -35,8 +35,8 @@ pub struct Constraint {
 
 #[derive(Serialize, Deserialize)]
 pub struct R1CS {
-    pub variables: Vec<Variable>,
-    pub constraints: Vec<Constraint>,
+    pub variables: Vec<Variable>,     // The Data (Witness)
+    pub constraints: Vec<Constraint>, // The Logic (Circuit itself)
 }
 
 impl R1CS {
