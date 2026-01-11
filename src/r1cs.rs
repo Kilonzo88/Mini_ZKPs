@@ -80,4 +80,46 @@ impl R1CS {
     pub fn add_variable(&mut self, variable: Variable) {
         self.variables.push(variable);
     }
+
+    pub fn is_satisfied<K>(&self, hash_function: K) -> bool
+    where
+        K: Fn(&BigInt, &BigInt) -> BigInt,
+    {
+        for constraint in &self.constraints {
+            let left_val = self.compute_term_sum(&constraint.left);
+            let right_val = self.compute_term_sum(&constraint.right);
+            let output_val = self.compute_term_sum(&constraint.output);
+
+            match constraint.operation {
+                Operation::Add => {
+                    if left_val + right_val != output_val {
+                        println!("Constraint Add failed");
+                        return false;
+                    }
+                }
+                Operation::Mul => {
+                    if left_val * right_val != output_val {
+                        println!("Constraint Mul failed");
+                        return false;
+                    }
+                }
+                Operation::Hash => {
+                    let computed_hash = hash_function(&left_val, &right_val);
+                    if computed_hash != output_val {
+                        println!("Constraint Hash failed");
+                        return false;
+                    }
+                }
+            }
+        }
+        true
+    }
+
+    fn compute_term_sum(&self, terms: &Vec<(Variable, BigInt)>) -> BigInt {
+        let mut sum = BigInt::from(0);
+        for (var, coeff) in terms {
+            sum += &var.value * coeff;
+        }
+        sum
+    }
 }
