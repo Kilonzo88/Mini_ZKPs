@@ -10,7 +10,7 @@ pub enum Gate {
 }
 
 pub struct Circuit {
-    hash_function: Option<Box<dyn HashFunction>>,
+    hash_function: Option<Box<dyn HashFunction>>, // Uses `Box<dyn ...>` to enable **Runtime Polymorphism**. For example (e.g., **SHA256 vs Poseidon**
     inputs: Vec<BigInt>,
     gates: Vec<Gate>,
     outputs: Vec<BigInt>,
