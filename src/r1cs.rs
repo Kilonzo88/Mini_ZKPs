@@ -81,9 +81,24 @@ impl R1CS {
         self.variables.push(variable);
     }
 
+    /// Verifies that all constraints in the R1CS are satisfied by the current variable assignments.
+    ///
+    /// For each constraint, this function:
+    /// 1. Computes the weighted sum of the left, right, and output terms
+    /// 2. Checks that the operation holds: `left OP right = output`
+    ///    - For `Add`: `left + right = output`
+    ///    - For `Mul`: `left * right = output`
+    ///    - For `Hash`: `hash(left, right) = output`
+    ///
+    /// # Arguments
+    /// * `hash_function` - A closure that computes the hash of two `BigInt` values
+    ///
+    /// # Returns
+    /// * `true` if all constraints are satisfied
+    /// * `false` if any constraint fails (prints which constraint type failed)
     pub fn is_satisfied<K>(&self, hash_function: K) -> bool
     where
-        K: Fn(&BigInt, &BigInt) -> BigInt,
+        K: Fn(&BigInt, &BigInt) -> BigInt, // Closure to compute hash
     {
         for constraint in &self.constraints {
             let left_val: BigInt = constraint
