@@ -14,6 +14,17 @@ pub enum Operation {
     Hash,
 }
 
+/// A Constraint represents the equation: `(Sum A) * (Sum B) = (Sum C)`
+///
+/// **Understanding the Tuple `(Variable, BigInt)`:**
+/// This tuple represents a single term in an equation, like **"2x"**.
+///
+/// * **The `Variable` is "x"**: It identifies *which* number we are talking about.
+/// * **The `BigInt` is "2"**: It is the **Multiplier** (scalar). It scales the variable.
+///
+/// **Example:**
+/// If you want to represent `3x + 5y`, you would create a generic vector:
+/// `vec![ (x, 3), (y, 5) ]`
 #[derive(Serialize, Deserialize)]
 pub struct Constraint {
     pub left: Vec<(Variable, BigInt)>,
