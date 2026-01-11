@@ -90,12 +90,19 @@ impl Circuit {
                 }
 
                 //Hashing gate
-                Gate::Hash(input, output, _) => {
+                Gate::Hash(a, b, output) => {
+                    let computed_hash = self.apply_hash(&self.inputs[*a], &self.inputs[*b]);
+                    r1cs.variables[*output].value = computed_hash.clone();
                     r1cs.add_constraint(
-                        vec![(r1cs.variables[*input].clone(), BigInt::from(1))],
-                        vec![],
+                        vec![(r1cs.variables[*a].clone(), BigInt::from(1))],
+                        vec![(r1cs.variables[*b].clone(), BigInt::from(1))],
                         vec![(r1cs.variables[*output].clone(), BigInt::from(1))],
                         Operation::Hash,
+                    );
+
+                    println!(
+                        "Applying Hash constraint: input_a = {}, input_b = {}, computed_hash = {}, output_index = {}",
+                        self.inputs[*a], self.inputs[*b], computed_hash, output
                     );
                 }
             }
