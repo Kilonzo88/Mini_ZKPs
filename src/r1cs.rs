@@ -33,6 +33,13 @@ pub struct Constraint {
     pub operation: Operation,
 }
 
+/// The R1CS (Rank-1 Constraint System) is the "World" of the proof.
+///
+/// It combines two things:
+/// 1. **Logic (Relationships)**: The `constraints`. These are the rules that must hold true.
+/// 2. **Memory (Assignments)**: The `variables`. These are the actual values for a specific run.
+///
+/// If `variables` satisfy all `constraints`, the proof is valid.
 #[derive(Serialize, Deserialize)]
 pub struct R1CS {
     pub variables: Vec<Variable>,     // The Data (Witness)
@@ -40,6 +47,7 @@ pub struct R1CS {
 }
 
 impl R1CS {
+    /// Creates a new, empty Constraint System.
     pub fn new() -> Self {
         Self {
             variables: Vec::new(),
@@ -47,6 +55,10 @@ impl R1CS {
         }
     }
 
+    /// Adds a new logic rule (Constraint) to the system.
+    ///
+    /// The Constraint says: `(Left * Right) = Output`
+    /// This defines HOW the variables must relate to each other.
     pub fn add_constraint(
         &mut self,
         left: Vec<(Variable, BigInt)>,
@@ -63,6 +75,8 @@ impl R1CS {
         self.constraints.push(constraint);
     }
 
+    /// Adds a known value to the witness memory.
+    /// This is where we store the actual numbers (e.g., "x is 5").
     pub fn add_variable(&mut self, variable: Variable) {
         self.variables.push(variable);
     }
