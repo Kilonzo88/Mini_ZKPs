@@ -86,9 +86,21 @@ impl R1CS {
         K: Fn(&BigInt, &BigInt) -> BigInt,
     {
         for constraint in &self.constraints {
-            let left_val = self.compute_term_sum(&constraint.left);
-            let right_val = self.compute_term_sum(&constraint.right);
-            let output_val = self.compute_term_sum(&constraint.output);
+            let left_val: BigInt = constraint
+                .left
+                .iter()
+                .map(|(var, coeff)| &var.value * coeff)
+                .sum();
+            let right_val: BigInt = constraint
+                .right
+                .iter()
+                .map(|(var, coeff)| &var.value * coeff)
+                .sum();
+            let output_val: BigInt = constraint
+                .output
+                .iter()
+                .map(|(var, coeff)| &var.value * coeff)
+                .sum();
 
             match constraint.operation {
                 Operation::Add => {
@@ -113,13 +125,5 @@ impl R1CS {
             }
         }
         true
-    }
-
-    fn compute_term_sum(&self, terms: &Vec<(Variable, BigInt)>) -> BigInt {
-        let mut sum = BigInt::from(0);
-        for (var, coeff) in terms {
-            sum += &var.value * coeff;
-        }
-        sum
     }
 }
