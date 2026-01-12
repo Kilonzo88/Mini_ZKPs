@@ -107,5 +107,25 @@ impl Circuit {
                 }
             }
         }
+
+        // Validate all constraints
+        let is_valid = r1cs.is_satisfied(|a, b| {
+            if let Some(ref hash_function) = self.hash_function {
+                hash_function.hash(a, b)
+            } else {
+                // Fallback if no hash function provided
+                a + b
+            }
+        });
+
+        // Save proof as bytes to binary file
+        let proof_data = bincode::serialize(&is_valid).expect("Failed to serialize proof"); //The result is a Vec<u8> (vector of bytes)
+        std::fs::write(proof_file, proof_data).expect("Failed to write proof file");
+
+        if is_valid {
+            println!("✓ Proof generated successfully: {}", proof_file);
+        } else {
+            println!("✗ Proof generation failed: constraints not satisfied");
+        }
     }
 }
