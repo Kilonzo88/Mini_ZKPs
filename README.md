@@ -59,3 +59,7 @@ first-principles approach to Zero-Knowledge system design that this repository b
 
 This Rust implementation is an independent, from-scratch re-engineering focused on
 clarity, extensibility, and systems-level understanding of ZK proof mechanics.
+
+## 🧾License
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
+
