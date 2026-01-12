@@ -124,4 +124,11 @@ impl Circuit {
             println!("✗ Proof generation failed: constraints not satisfied");
         }
     }
+
+    /// Verifies the proof by deserializing it from a binary file and checking if it's valid
+    pub fn verify_proof(&self, proof_file: &str) -> bool {
+        let proof_data = std::fs::read(proof_file).expect("Failed to read proof file");
+        let is_valid = bincode::deserialize(&proof_data).expect("Failed to deserialize proof");
+        is_valid
+    }
 }
