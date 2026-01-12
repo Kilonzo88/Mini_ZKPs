@@ -46,3 +46,16 @@ The R1CS ensures that for any given set of inputs, the mathematical "pressure" b
 │   ├── merkle.rs        # Utility: Merkle Tree & Path generation
 │   └── hash.rs          # Utility: Mock hash functions for debugging
 └── Cargo.toml           # Dependencies (rand, sha2, serde, bincode)
+```
+
+---
+
+## Acknowledgement
+This project was inspired by the original **Mini-ZK** implementation by **Luis Soares**  
+(https://github.com/luishsr/zk-mini).
+
+His work provided the conceptual foundation for the circuit-to-R1CS pipeline and the
+first-principles approach to Zero-Knowledge system design that this repository builds on.
+
+This Rust implementation is an independent, from-scratch re-engineering focused on
+clarity, extensibility, and systems-level understanding of ZK proof mechanics.
