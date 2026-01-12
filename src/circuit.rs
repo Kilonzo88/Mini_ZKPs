@@ -41,12 +41,10 @@ impl Circuit {
     }
 
     pub fn apply_hash(&self, a: &BigInt, b: &BigInt) -> BigInt {
-        if let Some(ref hash_function) = self.hash_function {
-            hash_function.hash(a, b)
-        } else {
-            //Default behaviour when there's no provided hash function
-            a + b // Example fallback hash; use a simple operation or return an error as needed
-        }
+        self.hash_function
+            .as_ref()
+            .expect("Hash gate used but no hash function provided")
+            .hash(a, b)
     }
 
     /// Retrieves an input value by index, if it exists
