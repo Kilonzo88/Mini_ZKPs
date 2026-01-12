@@ -50,7 +50,7 @@ The R1CS ensures that for any given set of inputs, the mathematical "pressure" b
 
 ---
 
-## Acknowledgement
+## 🙏Acknowledgement
 This project was inspired by the original **Mini-ZK** implementation by **Luis Soares**  
 (https://github.com/luishsr/zk-mini).
 
