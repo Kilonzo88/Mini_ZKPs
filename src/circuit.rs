@@ -110,12 +110,10 @@ impl Circuit {
 
         // Validate all constraints
         let is_valid = r1cs.is_satisfied(|a, b| {
-            if let Some(ref hash_function) = self.hash_function {
-                hash_function.hash(a, b)
-            } else {
-                // Fallback if no hash function provided
-                a + b
-            }
+            self.hash_function
+                .as_ref()
+                .expect("Hash gate used but no hash function provided")
+                .hash(a, b)
         });
 
         // Save proof as bytes to binary file
