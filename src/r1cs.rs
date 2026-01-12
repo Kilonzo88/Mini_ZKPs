@@ -152,4 +152,9 @@ impl R1CS {
         }
         true
     }
+
+    pub fn save_to_binary(&self, file_name: &str) {
+        let data = bincode::serialize(self).expect("Failed to serialize R1CS");
+        std::fs::write(file_name, data).expect("Failed to write R1CS to file");
+    }
 }
