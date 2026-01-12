@@ -119,21 +119,32 @@ impl R1CS {
 
             match constraint.operation {
                 Operation::Add => {
-                    if left_val + right_val != output_val {
-                        println!("Constraint Add failed");
+                    if left_val.clone() + right_val.clone() != output_val {
+                        println!(
+                            "Addition constraint not satisfied: left_value + right_value = {}, while output_value = {}",
+                            left_val + right_val,
+                            output_val
+                        );
                         return false;
                     }
                 }
                 Operation::Mul => {
-                    if left_val * right_val != output_val {
-                        println!("Constraint Mul failed");
+                    if left_val.clone() * right_val.clone() != output_val {
+                        println!(
+                            "Multiplication constraint not satisfied: left_value * right_value = {}, while output_value = {}",
+                            left_val * right_val,
+                            output_val
+                        );
                         return false;
                     }
                 }
                 Operation::Hash => {
                     let computed_hash = hash_function(&left_val, &right_val);
                     if computed_hash != output_val {
-                        println!("Constraint Hash failed");
+                        println!(
+                            "Hash constraint not satisfied: computed_hash = {}, while output_value = {}",
+                            computed_hash, output_val
+                        );
                         return false;
                     }
                 }
