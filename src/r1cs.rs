@@ -1,10 +1,10 @@
-use num_bigint::BigInt;
+use crate::field::FieldElement;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Variable {
     pub index: usize,
-    pub value: BigInt,
+    pub value: FieldElement,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -16,20 +16,20 @@ pub enum Operation {
 
 /// A Constraint represents the equation: `(Sum A) * (Sum B) = (Sum C)`
 ///
-/// **Understanding the Tuple `(Variable, BigInt)`:**
+/// **Understanding the Tuple `(Variable, FieldElement)`:**
 /// This tuple represents a single term in an equation, like **"2x"**.
 ///
 /// * **The `Variable` is "x"**: It identifies *which* number we are talking about.
-/// * **The `BigInt` is "2"**: It is the **Multiplier** (scalar). It scales the variable.
+/// * **The `FieldElement` is "2"**: It is the **Multiplier** (scalar). It scales the variable.
 ///
 /// **Example:**
 /// If you want to represent `3x + 5y`, you would create a generic vector:
 /// `vec![ (x, 3), (y, 5) ]`
 #[derive(Serialize, Deserialize)]
 pub struct Constraint {
-    pub left: Vec<(Variable, BigInt)>,
-    pub right: Vec<(Variable, BigInt)>,
-    pub output: Vec<(Variable, BigInt)>,
+    pub left: Vec<(Variable, FieldElement)>,
+    pub right: Vec<(Variable, FieldElement)>,
+    pub output: Vec<(Variable, FieldElement)>,
     pub operation: Operation,
 }
 
@@ -61,9 +61,9 @@ impl R1CS {
     /// This defines HOW the variables must relate to each other.
     pub fn add_constraint(
         &mut self,
-        left: Vec<(Variable, BigInt)>,
-        right: Vec<(Variable, BigInt)>,
-        output: Vec<(Variable, BigInt)>,
+        left: Vec<(Variable, FieldElement)>,
+        right: Vec<(Variable, FieldElement)>,
+        output: Vec<(Variable, FieldElement)>,
         operation: Operation,
     ) {
         let constraint = Constraint {
@@ -91,31 +91,36 @@ impl R1CS {
     ///    - For `Hash`: `hash(left, right) = output`
     ///
     /// # Arguments
-    /// * `hash_function` - A closure that computes the hash of two `BigInt` values
+    /// * `hash_function` - A closure that computes the hash of two `FieldElement` values
     ///
     /// # Returns
     /// * `true` if all constraints are satisfied
     /// * `false` if any constraint fails (prints which constraint type failed)
     pub fn is_satisfied<K>(&self, hash_function: K) -> bool
     where
-        K: Fn(&BigInt, &BigInt) -> BigInt, // Closure to compute hash
+        K: Fn(&FieldElement, &FieldElement) -> FieldElement, // Closure to compute hash
     {
         for constraint in &self.constraints {
-            let left_val: BigInt = constraint
+            let left_val: FieldElement = constraint
                 .left
                 .iter()
                 .map(|(var, coeff)| &var.value * coeff)
-                .sum();
-            let right_val: BigInt = constraint
+                .reduce(|a, b| a + b)
+                .unwrap_or_else(|| FieldElement::from_i32(0)); // Start with zero if empty, though usually not empty
+
+            let right_val: FieldElement = constraint
                 .right
                 .iter()
                 .map(|(var, coeff)| &var.value * coeff)
-                .sum();
-            let output_val: BigInt = constraint
+                .reduce(|a, b| a + b)
+                .unwrap_or_else(|| FieldElement::from_i32(0));
+
+            let output_val: FieldElement = constraint
                 .output
                 .iter()
                 .map(|(var, coeff)| &var.value * coeff)
-                .sum();
+                .reduce(|a, b| a + b)
+                .unwrap_or_else(|| FieldElement::from_i32(0));
 
             match constraint.operation {
                 Operation::Add => {
