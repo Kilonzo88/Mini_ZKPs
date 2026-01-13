@@ -1,7 +1,6 @@
+use crate::field::FieldElement;
 use crate::hash_functions::HashFunction;
 use crate::r1cs::{Operation, R1CS, Variable};
-use num_bigint::BigInt;
-use std::io::Write;
 
 pub enum Gate {
     Add(usize, usize, usize),  //Add: input1, input2, output
@@ -10,10 +9,10 @@ pub enum Gate {
 }
 
 pub struct Circuit {
-    hash_function: Option<Box<dyn HashFunction>>, // Uses `Box<dyn ...>` to enable **Runtime Polymorphism**. For example (e.g., **SHA256 vs Poseidon**
-    inputs: Vec<BigInt>,
+    hash_function: Option<Box<dyn HashFunction>>, // Uses `Box<dyn ...>` to enable **Runtime Polymorphism**.
+    inputs: Vec<FieldElement>,
     gates: Vec<Gate>,
-    outputs: Vec<BigInt>,
+    outputs: Vec<FieldElement>,
 }
 
 impl Circuit {
@@ -26,7 +25,7 @@ impl Circuit {
         }
     }
 
-    pub fn add_input(&mut self, input: BigInt) -> usize {
+    pub fn add_input(&mut self, input: FieldElement) -> usize {
         let index = self.inputs.len();
         self.inputs.push(input);
         index
@@ -36,11 +35,11 @@ impl Circuit {
         self.gates.push(gate);
     }
 
-    pub fn add_output(&mut self, output: BigInt) {
+    pub fn add_output(&mut self, output: FieldElement) {
         self.outputs.push(output);
     }
 
-    pub fn apply_hash(&self, a: &BigInt, b: &BigInt) -> BigInt {
+    pub fn apply_hash(&self, a: &FieldElement, b: &FieldElement) -> FieldElement {
         self.hash_function
             .as_ref()
             .expect("Hash gate used but no hash function provided")
@@ -48,7 +47,7 @@ impl Circuit {
     }
 
     /// Retrieves an input value by index, if it exists
-    pub fn get_input(&self, index: usize) -> Option<&BigInt> {
+    pub fn get_input(&self, index: usize) -> Option<&FieldElement> {
         self.inputs.get(index)
     }
 
@@ -70,9 +69,9 @@ impl Circuit {
                 //Addition Gate
                 Gate::Add(a, b, output) => {
                     r1cs.add_constraint(
-                        vec![(r1cs.variables[*a].clone(), BigInt::from(1))],
-                        vec![(r1cs.variables[*b].clone(), BigInt::from(1))],
-                        vec![(r1cs.variables[*output].clone(), BigInt::from(1))],
+                        vec![(r1cs.variables[*a].clone(), FieldElement::from_i32(1))],
+                        vec![(r1cs.variables[*b].clone(), FieldElement::from_i32(1))],
+                        vec![(r1cs.variables[*output].clone(), FieldElement::from_i32(1))],
                         Operation::Add,
                     );
                 }
@@ -80,9 +79,9 @@ impl Circuit {
                 //Multiplication gate
                 Gate::Mul(a, b, output) => {
                     r1cs.add_constraint(
-                        vec![(r1cs.variables[*a].clone(), BigInt::from(1))],
-                        vec![(r1cs.variables[*b].clone(), BigInt::from(1))],
-                        vec![(r1cs.variables[*output].clone(), BigInt::from(1))],
+                        vec![(r1cs.variables[*a].clone(), FieldElement::from_i32(1))],
+                        vec![(r1cs.variables[*b].clone(), FieldElement::from_i32(1))],
+                        vec![(r1cs.variables[*output].clone(), FieldElement::from_i32(1))],
                         Operation::Mul,
                     );
                 }
@@ -90,11 +89,41 @@ impl Circuit {
                 //Hashing gate
                 Gate::Hash(a, b, output) => {
                     let computed_hash = self.apply_hash(&self.inputs[*a], &self.inputs[*b]);
+
+                    // Add output variable if it doesn't exist (or update logic if outputs are pre-allocated)
+                    // The original code assumed outputs were allocated.
+                    // Let's ensure the variables vector is large enough or specific index is accessible.
+                    // In previous code: r1cs.variables[*output].value = computed_hash.clone();
+                    // This implies `*output` index must exist in `r1cs.variables`.
+                    // But `r1cs.variables` is initialized only from `self.inputs`.
+                    // If `*output` refers to an index beyond `self.inputs`, this would panic in original code too unless inputs included intermediate wires.
+                    // Assuming user adds ALL wires as inputs (including intermediates initialized to 0) or logic handles resizing.
+                    // For now, I'll match original behavior but extend vector if needed to avoid panic,
+                    // or just follow the original logic which likely assumed inputs covered everything.
+                    // Wait, `Circuit` struct assumes `inputs` covers all variables?
+                    // In `generate_proof`, `r1cs.variables` is collected from `self.inputs`.
+                    // So `*output` MUST be an index within `self.inputs`.
+
+                    if *output < r1cs.variables.len() {
+                        r1cs.variables[*output].value = computed_hash.clone();
+                    } else {
+                        // This is a logic gap in the original code if it didn't pre-allocate.
+                        // But if the user says "refactor", I should stick to existing logic but types swapped.
+                        // But wait, if I assign to `value`, I change the witness.
+                        // I'll stick to original logic:
+                        // r1cs.variables[*output].value = computed_hash.clone();
+                        // I will safeguard it slightly or just trust the panic is intended if OOB.
+                    }
+                    // Actually, let's look at `circuit.rs` before.
+                    // `r1cs.variables[*output].value = computed_hash.clone();`
+                    // So I will keep that.
+
                     r1cs.variables[*output].value = computed_hash.clone();
+
                     r1cs.add_constraint(
-                        vec![(r1cs.variables[*a].clone(), BigInt::from(1))],
-                        vec![(r1cs.variables[*b].clone(), BigInt::from(1))],
-                        vec![(r1cs.variables[*output].clone(), BigInt::from(1))],
+                        vec![(r1cs.variables[*a].clone(), FieldElement::from_i32(1))],
+                        vec![(r1cs.variables[*b].clone(), FieldElement::from_i32(1))],
+                        vec![(r1cs.variables[*output].clone(), FieldElement::from_i32(1))],
                         Operation::Hash,
                     );
 
