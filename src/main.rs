@@ -77,6 +77,7 @@ fn run_multiplication_proof() {
     }
 }
 
+/// A merkle Tree demonstrating the use of a Merkle path in a zk-circuit
 fn run_merkle_proof() {
     println!("\n[3] Running Merkle Tree Inclusion Proof...");
 
